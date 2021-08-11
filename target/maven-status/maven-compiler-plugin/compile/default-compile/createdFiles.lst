@@ -1,0 +1,6 @@
+com\hellionbots\Plugins\meow.class
+com\hellionbots\convertor.class
+com\hellionbots\Helpers\convertor.class
+com\hellionbots\Master.class
+com\hellionbots\App.class
+com\hellionbots\Helpers\configuration.class
