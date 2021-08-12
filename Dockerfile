@@ -5,4 +5,4 @@ COPY . .
 RUN mvn clean package
 
 # set the startup command to execute the jar
-CMD ["java", "-jar", "target/convertorbot-1.0-jar-with-dependencies.jar"]
+CMD ["java", "-jar", "target/convertorbot-1.0-SNAPSHOT-jar-with-dependencies.jar"]
