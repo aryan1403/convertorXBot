@@ -4,11 +4,17 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import javax.imageio.ImageIO;
+import com.aspose.ocr.AsposeOCR;
 import com.hellionbots.Helpers.configuration;
 import com.hellionbots.Plugins.help;
 import com.hellionbots.Plugins.meow;
 import com.hellionbots.Plugins.start;
-
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
@@ -27,17 +33,26 @@ public class convertor extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if(update.hasMessage()) sendRequests(update, update.getMessage().getText());
-        if(update.hasCallbackQuery()) test(update);
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (update.hasMessage())
+                    sendRequests(update, update.getMessage().getText());
+                if (update.hasCallbackQuery())
+                    test(update);
+            }
+        });
+        executorService.shutdown();
     }
-    
-    public void test(Update update){
-        if(update.hasCallbackQuery()){
+
+    public void test(Update update) {
+        if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             String data = callbackQuery.getData();
             String id = callbackQuery.getMessage().getChatId().toString();
 
-            if(data.equals("ttpdf")){
+            if (data.equals("ttpdf")) {
                 String text = callbackQuery.getMessage().getReplyToMessage().getText();
                 File file = new com.hellionbots.Helpers.convertor().convertTextToPdf(text);
                 SendDocument sendDocument = new SendDocument(id, new InputFile(file));
@@ -48,24 +63,24 @@ public class convertor extends TelegramLongPollingBot {
                     e.printStackTrace();
                 }
             }
-            if(data.equals("ttdoc")){
+            if (data.equals("ttdoc")) {
                 String text = callbackQuery.getMessage().getReplyToMessage().getText();
                 File file = new File("hey");
-                
+
                 try {
                     FileWriter fileWriter = new FileWriter(file);
                     fileWriter.append(text);
                     fileWriter.close();
 
                     SendDocument photo = new SendDocument(id, new InputFile(file));
-                
+
                     execute(photo);
                     file.delete();
                 } catch (TelegramApiException | IOException e1) {
                     e1.printStackTrace();
                 }
             }
-            if(data.equals("ttimage")){
+            if (data.equals("ttimage")) {
                 String text = callbackQuery.getMessage().getReplyToMessage().getText();
                 File file = new com.hellionbots.Helpers.convertor().convertTextToPdf(text);
                 try {
@@ -77,7 +92,7 @@ public class convertor extends TelegramLongPollingBot {
                     e1.printStackTrace();
                 }
             }
-            if(data.equals("dtpdf")) {
+            if (data.equals("dtpdf")) {
                 Document document = update.getCallbackQuery().getMessage().getReplyToMessage().getDocument();
                 GetFile getFile = new GetFile(document.getFileId());
                 org.telegram.telegrambots.meta.api.objects.File file;
@@ -89,7 +104,7 @@ public class convertor extends TelegramLongPollingBot {
                     e.printStackTrace();
                 }
             }
-            if(data.equals("dtimage")) {
+            if (data.equals("dtimage")) {
                 Document document = update.getCallbackQuery().getMessage().getReplyToMessage().getDocument();
                 GetFile getFile = new GetFile(document.getFileId());
                 org.telegram.telegrambots.meta.api.objects.File file;
@@ -101,8 +116,9 @@ public class convertor extends TelegramLongPollingBot {
                     e.printStackTrace();
                 }
             }
-            if(data.equals("dtdoc")){
-                //File file = new com.hellionbots.Helpers.convertor().generatePDFFromImage(file);
+            if (data.equals("dtdoc")) {
+                // File file = new
+                // com.hellionbots.Helpers.convertor().generatePDFFromImage(file);
                 Document doc = update.getCallbackQuery().getMessage().getReplyToMessage().getDocument();
                 GetFile getFile = new GetFile(doc.getFileId());
                 org.telegram.telegrambots.meta.api.objects.File file;
@@ -114,11 +130,160 @@ public class convertor extends TelegramLongPollingBot {
                     e.printStackTrace();
                 }
             }
+            if (data.equals("itt")) {
+                List<PhotoSize> arr = update.getCallbackQuery().getMessage().getReplyToMessage().getPhoto();
+
+                PhotoSize biggSize = null;
+                for (int i = 0; i < arr.size(); i++) {
+                    for (int j = 0; j < arr.size(); j++) {
+                        if (arr.get(i).getFileSize() > arr.get(j).getFileSize())
+                            biggSize = arr.get(i);
+                    }
+                }
+                PhotoSize photos = biggSize;
+                GetFile getFiled = new GetFile();
+                getFiled.setFileId(photos.getFileId());
+
+                org.telegram.telegrambots.meta.api.objects.File file;
+                try {
+                    file = execute(getFiled);
+                    File res = downloadFile(file);
+
+                    BufferedImage buffImg = new BufferedImage(240, 240, BufferedImage.TYPE_INT_ARGB);
+
+                    try {
+                        buffImg = ImageIO.read(res);
+                    } catch (IOException e) {
+                    }
+                    Message m;
+                    SendMessage sendMessage = new SendMessage(id, "Reading Image...");
+                    sendMessage.setReplyToMessageId(update.getCallbackQuery().getMessage().getMessageId());
+
+                    m = execute(sendMessage);
+
+                    // Create api instance
+                    AsposeOCR api = new AsposeOCR();
+
+                    // Recognize page by full path to file
+                    String result = api.RecognizePage(buffImg);
+
+                    EditMessageText editMessageText = new EditMessageText();
+                    editMessageText.setMessageId(m.getMessageId());
+                    editMessageText.setText(result);
+                    editMessageText.setChatId(id);
+
+                    execute(editMessageText);
+                    res.delete();
+                } catch (IOException | TelegramApiException e) {
+                }
+            }
+            if (data.equals("itpng")) {
+                List<PhotoSize> arr = update.getCallbackQuery().getMessage().getReplyToMessage().getPhoto();
+
+                PhotoSize biggSize = null;
+                for (int i = 0; i < arr.size(); i++) {
+                    for (int j = 0; j < arr.size(); j++) {
+                        if (arr.get(i).getFileSize() > arr.get(j).getFileSize())
+                            biggSize = arr.get(i);
+                    }
+                }
+                PhotoSize photos = biggSize;
+                GetFile getFiled = new GetFile();
+                getFiled.setFileId(photos.getFileId());
+
+                org.telegram.telegrambots.meta.api.objects.File file;
+
+                try {
+                    file = execute(getFiled);
+                    File res = downloadFile(file);
+
+                    BufferedImage buffImg = new BufferedImage(240, 240, BufferedImage.TYPE_INT_ARGB);
+
+                    try {
+                        buffImg = ImageIO.read(res);
+                    } catch (IOException e) {
+                    }
+                    res.delete();
+
+                    File outputfile = new File("image.png");
+                    try {
+                        ImageIO.write(buffImg, "png", outputfile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    SendPhoto sendMessage = new SendPhoto(id, new InputFile(outputfile));
+                    sendMessage.setReplyToMessageId(update.getCallbackQuery().getMessage().getMessageId());
+
+                    execute(sendMessage);
+                    outputfile.delete();
+                } catch (TelegramApiException e) {
+                }
+            }
+            if (data.equals("itjpg")) {
+                List<PhotoSize> arr = update.getCallbackQuery().getMessage().getReplyToMessage().getPhoto();
+
+                PhotoSize biggSize = null;
+                for (int i = 0; i < arr.size(); i++) {
+                    for (int j = 0; j < arr.size(); j++) {
+                        if (arr.get(i).getFileSize() > arr.get(j).getFileSize())
+                            biggSize = arr.get(i);
+                    }
+                }
+                PhotoSize photos = biggSize;
+                GetFile getFiled = new GetFile();
+                getFiled.setFileId(photos.getFileId());
+
+                org.telegram.telegrambots.meta.api.objects.File file;
+
+                try {
+                    file = execute(getFiled);
+                    File res = downloadFile(file);
+
+                    BufferedImage buffImg = new BufferedImage(240, 240, BufferedImage.TYPE_INT_ARGB);
+
+                    try {
+                        buffImg = ImageIO.read(res);
+                    } catch (IOException e) {
+                    }
+                    res.delete();
+
+                    File outputfile = new File("image.jpg");
+                    try {
+                        ImageIO.write(buffImg, "jpg", outputfile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    SendPhoto sendMessage = new SendPhoto(id, new InputFile(outputfile));
+                    sendMessage.setReplyToMessageId(update.getCallbackQuery().getMessage().getMessageId());
+
+                    execute(sendMessage);
+                    outputfile.delete();
+                } catch (TelegramApiException e) {
+                }
+            }
         }
 
     }
 
-    public PhotoSize getPhoto(List<PhotoSize> arr){
+    class ImageConverter {
+        public File convertTo(String filename, String formatName) throws IOException {
+            FileInputStream inputStream = new FileInputStream(filename);
+            FileOutputStream outputStream = new FileOutputStream(filename);
+
+            BufferedImage inputImage = ImageIO.read(inputStream);
+
+            ImageIO.write(inputImage, formatName, outputStream);
+
+            outputStream.close();
+            inputStream.close();
+
+            return new File(filename);
+        }
+    }
+
+    public PhotoSize getPhoto(List<PhotoSize> arr) {
         PhotoSize biggSize = null;
         for (int i = 0; i < arr.size(); i++) {
             for (int j = 0; j < arr.size(); j++) {
@@ -130,9 +295,9 @@ public class convertor extends TelegramLongPollingBot {
     }
 
     public void sendRequests(Update update, String cmd) {
+        new meow().handleRequests(update, cmd);
         new start().handleRequests(update, cmd);
         new help().handleRequests(update, cmd);
-        new meow().handleRequests(update, cmd);
     }
 
     public String getHandler() {
@@ -143,7 +308,7 @@ public class convertor extends TelegramLongPollingBot {
         return update.getMessage().getChatId().toString();
     }
 
-    public void editMessage(Update update, int mid, String text){
+    public void editMessage(Update update, int mid, String text) {
         EditMessageText editMessageText = new EditMessageText();
         editMessageText.setChatId(chatId(update));
         editMessageText.setMessageId(mid);
@@ -171,11 +336,11 @@ public class convertor extends TelegramLongPollingBot {
         return null;
     }
 
-    public String support(){
+    public String support() {
         return "@HellionBotSupport";
     }
 
-    public String channel(){
+    public String channel() {
         return "@HellionBots";
     }
 
@@ -188,5 +353,5 @@ public class convertor extends TelegramLongPollingBot {
     public String getBotToken() {
         return configuration.botToken;
     }
-    
+
 }
