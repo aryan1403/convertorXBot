@@ -5,7 +5,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import com.hellionbots.Helpers.configuration;
+import com.hellionbots.Plugins.help;
 import com.hellionbots.Plugins.meow;
+import com.hellionbots.Plugins.start;
+
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
@@ -24,7 +27,7 @@ public class convertor extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if(update.hasMessage()) new meow().handleRequests(update, update.getMessage().getText());
+        if(update.hasMessage()) sendRequests(update, update.getMessage().getText());
         if(update.hasCallbackQuery()) test(update);
     }
     
@@ -126,7 +129,9 @@ public class convertor extends TelegramLongPollingBot {
         return biggSize;
     }
 
-    public void sendRequests(Update update, String cmd){
+    public void sendRequests(Update update, String cmd) {
+        new start().handleRequests(update, cmd);
+        new help().handleRequests(update, cmd);
         new meow().handleRequests(update, cmd);
     }
 
