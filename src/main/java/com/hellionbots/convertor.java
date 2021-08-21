@@ -17,6 +17,7 @@ import com.hellionbots.Plugins.meow;
 import com.hellionbots.Plugins.start;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -27,6 +28,7 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public class convertor extends TelegramLongPollingBot {
@@ -37,10 +39,21 @@ public class convertor extends TelegramLongPollingBot {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                if (update.hasMessage())
-                    sendRequests(update, update.getMessage().getText());
-                if (update.hasCallbackQuery())
-                    test(update);
+                GetChatMember getChatMember = new GetChatMember("@HellionBotSupport",
+                        update.getMessage().getFrom().getId());
+                try {
+                    ChatMember c = execute(getChatMember);
+                    if (!c.getStatus().equals("left")) {
+                        if (update.hasMessage())
+                            sendRequests(update, update.getMessage().getText());
+                        if (update.hasCallbackQuery())
+                            test(update);
+                    } else {
+                        sendMessage(update, "Join @HellionBots\nJoin @HellionBotSupport\n\nIn order to use me :)");
+                    }
+                } catch (TelegramApiException e) {
+                    System.out.println(e.getMessage());
+                }
             }
         });
         executorService.shutdown();
