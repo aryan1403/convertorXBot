@@ -35,12 +35,20 @@ public class convertor extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        GetChatMember getChatMember;
+        if (update.hasCallbackQuery()) {
+            getChatMember = new GetChatMember("@HellionBotSupport",
+                    update.getCallbackQuery().getMessage().getFrom().getId());
+
+        } else {
+            getChatMember = new GetChatMember("@HellionBotSupport", update.getMessage().getFrom().getId());
+        }
+
         ExecutorService executorService = Executors.newFixedThreadPool(15);
         executorService.execute(new Runnable() {
+
             @Override
             public void run() {
-                GetChatMember getChatMember = new GetChatMember("@HellionBotSupport",
-                        update.getMessage().getFrom().getId());
                 try {
                     ChatMember c = execute(getChatMember);
                     if (!c.getStatus().equals("left")) {
@@ -54,9 +62,11 @@ public class convertor extends TelegramLongPollingBot {
                 } catch (TelegramApiException e) {
                     System.out.println(e.getMessage());
                 }
+
             }
         });
         executorService.shutdown();
+
     }
 
     public void test(Update update) {
