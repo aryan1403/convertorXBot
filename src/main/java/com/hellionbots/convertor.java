@@ -35,7 +35,7 @@ public class convertor extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        ExecutorService executorService = Executors.newFixedThreadPool(15);
         executorService.execute(new Runnable() {
             @Override
             public void run() {
