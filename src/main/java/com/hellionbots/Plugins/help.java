@@ -18,7 +18,8 @@ public class help extends convertor implements Master {
                 + "I can convert any text, Document's into PDF, Docs & Image\n\n"
                 + "1. Type any text\n"
                 + "2. Send me any Document\n"
-                + "3. Send me any Image\n\n"
+                + "3. Send me any Image\n"
+                + "4. Reply /rename <File name> to any Document\n\n"
                 + "For any Feedback or Help Join " + support() + "\n\n"
                 + "Powered by " + channel()
             );
