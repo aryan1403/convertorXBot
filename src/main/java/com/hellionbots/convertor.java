@@ -10,10 +10,10 @@ import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import javax.imageio.ImageIO;
-import com.aspose.ocr.AsposeOCR;
 import com.hellionbots.Helpers.configuration;
 import com.hellionbots.Plugins.help;
 import com.hellionbots.Plugins.meow;
+import com.hellionbots.Plugins.rename;
 import com.hellionbots.Plugins.start;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
@@ -276,6 +276,7 @@ public class convertor extends TelegramLongPollingBot {
         new meow().handleRequests(update, cmd);
         new start().handleRequests(update, cmd);
         new help().handleRequests(update, cmd);
+        new rename().handleRequests(update, cmd);
     }
 
     public String getHandler() {
