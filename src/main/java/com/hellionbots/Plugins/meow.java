@@ -96,12 +96,8 @@ public class meow extends convertor implements Master {
         if(update.getMessage().hasPhoto()) {
             InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 
-            InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
             InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
             InlineKeyboardButton inlineKeyboardButton3 = new InlineKeyboardButton();
-
-            inlineKeyboardButton1.setText("Convert to Text");
-            inlineKeyboardButton1.setCallbackData("itt");
 
             inlineKeyboardButton2.setText("Convert to Png");
             inlineKeyboardButton2.setCallbackData("itpng");
@@ -109,16 +105,13 @@ public class meow extends convertor implements Master {
             inlineKeyboardButton3.setText("Convert to Jpg");
             inlineKeyboardButton3.setCallbackData("itjpg");
 
-            List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
             List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
             List<InlineKeyboardButton> keyboardButtonsRow3 = new ArrayList<>();
 
-            keyboardButtonsRow1.add(inlineKeyboardButton1);
             keyboardButtonsRow2.add(inlineKeyboardButton2);
             keyboardButtonsRow3.add(inlineKeyboardButton3);
 
             List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-            rowList.add(keyboardButtonsRow1);
             rowList.add(keyboardButtonsRow2);
             rowList.add(keyboardButtonsRow3);
 
