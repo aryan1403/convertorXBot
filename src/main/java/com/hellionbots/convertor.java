@@ -44,30 +44,27 @@ public class convertor extends TelegramLongPollingBot {
             getChatMember = new GetChatMember("@HellionBotSupport", update.getMessage().getFrom().getId());
         }
 
-        try {
-            ChatMember c = execute(getChatMember);
-            if (!c.getStatus().equals("left")) {
-                if (update.hasMessage())
-                    sendRequests(update, update.getMessage().getText());
-                if (update.hasCallbackQuery())
-                    test(update);
-            } else {
-                sendMessage(update, "Join @HellionBots\nJoin @HellionBotSupport\n\nIn order to use me :)");
-            }
-        } catch (TelegramApiException e) {
-            System.out.println(e.getMessage());
-        }
-
-        /*ExecutorService executorService = Executors.newFixedThreadPool(15);
+        ExecutorService executorService = Executors.newFixedThreadPool(15);
         executorService.execute(new Runnable() {
 
             @Override
             public void run() {
-                
-
+                try {
+                    ChatMember c = execute(getChatMember);
+                    if (!c.getStatus().equals("left")) {
+                        if (update.hasMessage())
+                            sendRequests(update, update.getMessage().getText());
+                        if (update.hasCallbackQuery())
+                            test(update);
+                    } else {
+                        sendMessage(update, "Join @HellionBots\nJoin @HellionBotSupport\n\nIn order to use me :)");
+                    }
+                } catch (TelegramApiException e) {
+                    System.out.println(e.getMessage());
+                }
             }
         });
-        executorService.shutdown();*/
+        executorService.shutdown();
 
     }
 
