@@ -44,28 +44,30 @@ public class convertor extends TelegramLongPollingBot {
             getChatMember = new GetChatMember("@HellionBotSupport", update.getMessage().getFrom().getId());
         }
 
-        ExecutorService executorService = Executors.newFixedThreadPool(15);
+        try {
+            ChatMember c = execute(getChatMember);
+            if (!c.getStatus().equals("left")) {
+                if (update.hasMessage())
+                    sendRequests(update, update.getMessage().getText());
+                if (update.hasCallbackQuery())
+                    test(update);
+            } else {
+                sendMessage(update, "Join @HellionBots\nJoin @HellionBotSupport\n\nIn order to use me :)");
+            }
+        } catch (TelegramApiException e) {
+            System.out.println(e.getMessage());
+        }
+
+        /*ExecutorService executorService = Executors.newFixedThreadPool(15);
         executorService.execute(new Runnable() {
 
             @Override
             public void run() {
-                try {
-                    ChatMember c = execute(getChatMember);
-                    if (!c.getStatus().equals("left")) {
-                        if (update.hasMessage())
-                            sendRequests(update, update.getMessage().getText());
-                        if (update.hasCallbackQuery())
-                            test(update);
-                    } else {
-                        sendMessage(update, "Join @HellionBots\nJoin @HellionBotSupport\n\nIn order to use me :)");
-                    }
-                } catch (TelegramApiException e) {
-                    System.out.println(e.getMessage());
-                }
+                
 
             }
         });
-        executorService.shutdown();
+        executorService.shutdown();*/
 
     }
 
@@ -151,53 +153,6 @@ public class convertor extends TelegramLongPollingBot {
                     execute(new SendDocument(id, new InputFile(res)));
                 } catch (TelegramApiException e) {
                     e.printStackTrace();
-                }
-            }
-            if (data.equals("itt")) {
-                List<PhotoSize> arr = update.getCallbackQuery().getMessage().getReplyToMessage().getPhoto();
-
-                PhotoSize biggSize = null;
-                for (int i = 0; i < arr.size(); i++) {
-                    for (int j = 0; j < arr.size(); j++) {
-                        if (arr.get(i).getFileSize() > arr.get(j).getFileSize())
-                            biggSize = arr.get(i);
-                    }
-                }
-                PhotoSize photos = biggSize;
-                GetFile getFiled = new GetFile();
-                getFiled.setFileId(photos.getFileId());
-
-                org.telegram.telegrambots.meta.api.objects.File file;
-                try {
-                    file = execute(getFiled);
-                    File res = downloadFile(file);
-
-                    BufferedImage buffImg = new BufferedImage(240, 240, BufferedImage.TYPE_INT_ARGB);
-
-                    try {
-                        buffImg = ImageIO.read(res);
-                    } catch (IOException e) {
-                    }
-                    Message m;
-                    SendMessage sendMessage = new SendMessage(id, "Reading Image...");
-                    sendMessage.setReplyToMessageId(update.getCallbackQuery().getMessage().getMessageId());
-
-                    m = execute(sendMessage);
-
-                    // Create api instance
-                    AsposeOCR api = new AsposeOCR();
-
-                    // Recognize page by full path to file
-                    String result = api.RecognizePage(buffImg);
-
-                    EditMessageText editMessageText = new EditMessageText();
-                    editMessageText.setMessageId(m.getMessageId());
-                    editMessageText.setText(result);
-                    editMessageText.setChatId(id);
-
-                    execute(editMessageText);
-                    res.delete();
-                } catch (IOException | TelegramApiException e) {
                 }
             }
             if (data.equals("itpng")) {
